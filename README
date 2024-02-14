@@ -1,0 +1,78 @@
+#環境
+○OS
+　・Amazon Linux2
+○Pythonバージョン
+　・Python3.11.8
+○Python仮想環境のありか
+　・
+
+
+"""EC2の設定"""
+"""Python3.11のインストール"""
+#コンパイルに必要な開発ツールをインストール
+sudo yum groupinstall "Development Tools"
+
+#Python のビルドに必要なライブラリをインストール
+sudo yum install -y openssl-devel bzip2-devel libffi-devel
+
+# Python 3.11 のソースコードをダウンロード
+cd /usr/src
+sudo wget https://www.python.org/ftp/python/3.11.8/Python-3.11.8.tgz
+
+#ダウンロードした tar ファイルを展開
+sudo tar xzf Python-3.11.8.tgz
+
+#ソースコードディレクトリに移動して、ビルドとインストール
+cd Python-3.11.8
+sudo ./configure --enable-optimizations
+sudo make altinstall
+
+
+"""Python バージョンの切り替え"""
+#現在のシンボリックリンクの削除
+sudo rm /usr/bin/python
+
+#新しいシンボリックリンクの作成
+sudo ln -s /usr/local/bin/python3.11 /usr/bin/python
+
+
+"""VOICEVOXのコンテナをインストール"""
+#dockerのインストール
+yum install docker
+
+#dockerの起動
+sudo service docker start
+
+#VoicevoxのDockerImageを取得
+docker pull voicevox/voicevox_engine:cpu-ubuntu20.04-latest
+
+#pullしたDockerの実行
+docker run --rm -it -p '100.24.0.11:50021:50021' voicevox/voicevox_engine:cpu-ubuntu20.04-latest
+""""""
+
+
+"""Lambdaの設定"""
+#1.Lambda アプリケーションを作成する
+#2.サーバーレスアプリケーションの項目にて、検索窓から「alexa」と検索し、alexa-skills-kit-python36-factskillを作成する。
+#3.LambdaをEC2と同じVPCに設定
+#4.レイヤーにPythonのライブラリをzip化したものを格納
+#5.環境変数にOPENAIのAPIキーを設定する。
+""""""
+
+"""VPC設定"""
+#1.セキュリティグループにて、インターネットへの疎通を許可する。
+#2.private subnetにEC2とLambdaを配置
+#3.NAT Gatewayをpublic subnetに設定
+#4.private subnetのルートテーブルにNAT Gatewayを追加
+""""""
+
+"""参考資料"""
+Dockerイメージ(voicevox/voicevox_engine)
+https://hub.docker.com/r/voicevox/voicevox_engine
+
+"""AWS コマンド"""
+#AMIコピー
+aws ec2 copy-image --source-region ap-northeast-1 --source-image-id <ami-id> --name VOICEVOX-EC2 --region us-east-1
+
+#keypair削除
+aws ec2 delete-key-pair --key-name "ec2-key" --region us-east-1
