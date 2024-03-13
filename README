@@ -3,8 +3,6 @@
 　・Amazon Linux2
 ○Pythonバージョン
 　・Python3.11.8
-○Python仮想環境のありか
-　・
 
 
 """EC2の設定"""
